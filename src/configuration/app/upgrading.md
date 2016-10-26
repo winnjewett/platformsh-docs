@@ -1,5 +1,45 @@
 # Upgrading
 
+## Changes in version 2016.5
+
+As of October 2016, we now always set `Cache-Control` HTTP response header for static files. This prevents undefined caching behavior on static files that we allowed in the past. The default behavior is disabling cache of static files. Please make sure you have put a `expires` key in your [location configuration](https://docs.platform.sh/configuration/app-containers.html#locations).
+
+If you're still using the [old format](#changes-in-version-20164), you will have to add the `expires` key like the one below.
+
+```
+    web:
+        document_root: "/"
+        passthru: "/index.php"
+        index_files:
+            - "index.php"
+        expires: 300
+        whitelist:
+            - \.html$
+```
+
+If you're using the new format, take the following as an example.
+
+```
+    web:
+        locations:
+            "/":
+                root: "public"
+                passthru: "/index.php"
+                index:
+                    - index.php
+                expires: 300
+                scripts: true
+                allow: true
+                rules:
+                    \.mp4$:
+                        allow: false
+                        expires: -1
+            "/sites/default/files":
+                expires: 300
+                passthru: true
+                allow: true
+```
+
 ## Changes in version 2016.4
 
 As of July 2016, we no longer create default configuration files if one is not provided.  The defaults we used to provide were tailored specifically for Drupal 7, which is now a legacy-support version with the release of Drupal 8 and not especially useful for non-Drupal or non-PHP sites.  They also defaulted to software versions that are no longer current and recommended.  Instead, you must provide your own `.platform.app.yaml`, `.platform/routes.yaml`, and `.platform/services.yaml` files.
